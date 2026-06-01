@@ -2,59 +2,61 @@ import cv2
 import os
 from natsort import natsorted
 
-# === CONFIGURATION ===
-dossier_images = "/home/tonino/Documents"       # Dossier contenant les photos
-video_sortie = "timelapse.mp4"  # Nom du fichier vidéo final
-fps = 30                        # Images par seconde
 
-# Extensions acceptées
-extensions = (".jpg", ".jpeg", ".png")
+def create_timelapse(dirpic, diroutvid, framerate):
+    # === CONFIGURATION ===
+    dossier_images = dirpic       # Dossier contenant les photos
+    video_sortie = diroutvid + "/timelapse.mp4"  # Nom du fichier vidéo final
+    fps = framerate                        # Images par seconde
 
-# === RÉCUPÉRATION DES IMAGES ===
-images = [
-    f for f in os.listdir(dossier_images)
-    if f.lower().endswith(extensions)
-]
+    # Extensions acceptées
+    extensions = (".jpg", ".jpeg", ".png")
 
-print(images)
+    # === RÉCUPÉRATION DES IMAGES ===
+    images = [
+        f for f in os.listdir(dossier_images)
+        if f.lower().endswith(extensions)
+    ]
 
-# Tri naturel : image1, image2, image10...
-images = natsorted(images)
+    print(images)
 
-print(images)
+    # Tri naturel : image1, image2, image10...
+    images = natsorted(images)
 
-if not images:
-    raise Exception("Aucune image trouvée.")
+    print(images)
 
-# === LECTURE DE LA PREMIÈRE IMAGE ===
-premiere_image = cv2.imread(os.path.join(dossier_images, images[0]))
+    if not images:
+        raise Exception("Aucune image trouvée.")
 
-hauteur, largeur, _ = premiere_image.shape
+    # === LECTURE DE LA PREMIÈRE IMAGE ===
+    premiere_image = cv2.imread(os.path.join(dossier_images, images[0]))
 
-# === INITIALISATION VIDÉO ===
-fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    hauteur, largeur, _ = premiere_image.shape
 
-video = cv2.VideoWriter(
-    video_sortie,
-    fourcc,
-    fps,
-    (largeur, hauteur)
-)
+    # === INITIALISATION VIDÉO ===
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
-# === AJOUT DES IMAGES ===
-for nom_image in images:
-    chemin = os.path.join(dossier_images, nom_image)
+    video = cv2.VideoWriter(
+        video_sortie,
+        fourcc,
+        fps,
+        (largeur, hauteur)
+    )
 
-    image = cv2.imread(chemin)
+    # === AJOUT DES IMAGES ===
+    for nom_image in images:
+        chemin = os.path.join(dossier_images, nom_image)
 
-    # Vérifie que toutes les images ont la même taille
-    image = cv2.resize(image, (largeur, hauteur))
+        image = cv2.imread(chemin)
 
-    video.write(image)
+        # Vérifie que toutes les images ont la même taille
+        image = cv2.resize(image, (largeur, hauteur))
 
-    print(f"Ajout : {nom_image}")
+        video.write(image)
 
-# === FINALISATION ===
-video.release()
+        print(f"Ajout : {nom_image}")
 
-print(f"\nTimelapse créé : {video_sortie}")
+    # === FINALISATION ===
+    video.release()
+
+    print(f"\nTimelapse créé : {video_sortie}")
